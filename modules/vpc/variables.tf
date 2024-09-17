@@ -1,12 +1,13 @@
 variable "vpc_name" {
+ type    = string
 }
 
 variable "cluster_name" {
+    type    = string
 }
 
 variable "azs" {
   type    = list(string)
-  default = ["sa-east-1a", "sa-east-1b"]
 }
 
 variable "vpc_cidr" {
