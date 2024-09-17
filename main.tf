@@ -1,8 +1,6 @@
 module "vpc" {
-  source = "./modules/vpc"
-  project_name = local.project_name
-  env = local.env
-  region = local.region
-  zone1 = local.zone1
-  zone2 = local.zone2
+  source       = "./modules/vpc"
+  vpc_name     = local.vpc_name
+  azs          = data.aws_availability_zones.available.names
+  cluster_name = local.cluster_name
 }
