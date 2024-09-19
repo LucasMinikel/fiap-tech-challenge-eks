@@ -1,5 +1,4 @@
-name: Terraform Plan Teste
-
+name: Terraform Plan
 
 on:
     pull_request:
@@ -27,4 +26,13 @@ jobs:
           terraform_version: 1.7.0
 
       - name: Inicializar Terraform
-        run: terraform init
+        run: terraform init -upgrade
+
+      - name: Formatar arquivos de configuração
+        run: terraform fmt -check
+
+      - name: Validar arquivos de configuração
+        run: terraform validate
+
+      - name: Planejar infraestrutura
+        run: terraform plan
