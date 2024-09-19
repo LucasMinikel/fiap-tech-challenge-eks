@@ -1,9 +1,13 @@
-name: Terraform Plan
+name: Terraform Apply
 
 on:
-    pull_request:
-      branches:
-        - main
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: sa-east-1
+  CLUSTER_NAME: tech-challenge-cluster
 
 jobs:
   build:
@@ -18,7 +22,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: sa-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -36,3 +40,13 @@ jobs:
 
       - name: Planejar infraestrutura
         run: terraform plan
+
+      - name: Aplicar infraestrutura
+        run: terraform apply -auto-approve -input=false
+
+      - name: Atualizar configuração do Kube
+        run: aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Deploy Nginx
+        run: |
+          kubectl apply -f nginx.yaml
