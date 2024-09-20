@@ -49,4 +49,10 @@ jobs:
 
       - name: Deploy Nginx
         run: |
-          kubectl apply -f nginx.yaml
+          	kubectl apply -f k8s/common
+            kubectl apply -f k8s/cache
+            kubectl apply -f k8s/database
+            kubectl apply -f k8s/fpm
+            kubectl apply -f k8s/webserver
+            kubectl apply -f k8s/queue-workers
+            kubectl apply -f k8s/cronjob
