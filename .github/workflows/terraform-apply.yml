@@ -49,10 +49,10 @@ jobs:
 
       - name: Deploy k8s
         run: |
-          	kubectl apply -f k8s/common
-            kubectl apply -f k8s/cache
-            kubectl apply -f k8s/database
-            kubectl apply -f k8s/fpm
-            kubectl apply -f k8s/webserver
-            kubectl apply -f k8s/queue-workers
-            kubectl apply -f k8s/cronjob
+          kubectl apply -f k8s/common
+          kubectl apply -f k8s/cache
+          kubectl apply -f k8s/database
+          kubectl apply -f k8s/fpm
+          kubectl apply -f k8s/webserver
+          kubectl apply -f k8s/queue-workers
+          kubectl apply -f k8s/cronjob

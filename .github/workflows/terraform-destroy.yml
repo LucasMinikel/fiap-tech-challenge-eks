@@ -39,15 +39,15 @@ jobs:
       - name: Atualizar configuração do Kube
         run: aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
 
-      - name: Deploy k8s
+      - name: Delete k8s
         run: |
-            kubectl delete -f k8s/common
-            kubectl delete -f k8s/cache
-            kubectl delete -f k8s/database
-            kubectl delete -f k8s/fpm
-            kubectl delete -f k8s/webserver
-            kubectl delete -f k8s/queue-workers
-            kubectl delete -f k8s/cronjob
+          kubectl delete -f k8s/common
+          kubectl delete -f k8s/cache
+          kubectl delete -f k8s/database
+          kubectl delete -f k8s/fpm
+          kubectl delete -f k8s/webserver
+          kubectl delete -f k8s/queue-workers
+          kubectl delete -f k8s/cronjob
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve -input=false
