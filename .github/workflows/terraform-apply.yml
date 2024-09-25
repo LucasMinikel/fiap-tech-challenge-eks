@@ -23,6 +23,14 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+          
+      - name: Secrets Manager
+        id: secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            MY_AWS_SECRET
+          parse-json-secrets: true    
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -47,12 +55,14 @@ jobs:
       - name: Atualizar configuração do Kube
         run: aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
 
+      - name: Criar ou Atualizar Secrets no Kubernetes
+        run: |
+          kubectl create secret generic secret-common \
+            --from-literal=TESTE=${{ secrets.MY_AWS_SECRET.TESTE }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
       - name: Deploy k8s
         run: |
           kubectl apply -f k8s/common
-          kubectl apply -f k8s/cache
-          kubectl apply -f k8s/database
           kubectl apply -f k8s/fpm
           kubectl apply -f k8s/webserver
-          kubectl apply -f k8s/queue-workers
-          kubectl apply -f k8s/cronjob
