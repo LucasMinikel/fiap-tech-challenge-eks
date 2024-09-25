@@ -62,7 +62,7 @@ jobs:
       - name: Criar ou Atualizar Secrets no Kubernetes
         run: |
           kubectl create secret generic secret-common \
-            --from-literal=TESTE=${{ secrets.MY_AWS_SECRET.TESTE }} \
+            --from-literal=TESTE=${{ env.MY_AWS_SECRET_TESTE }} \
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy k8s
