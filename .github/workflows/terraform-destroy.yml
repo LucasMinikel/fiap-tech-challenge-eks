@@ -42,12 +42,8 @@ jobs:
       - name: Delete k8s
         run: |
           kubectl delete -f k8s/common
-          kubectl delete -f k8s/cache
-          kubectl delete -f k8s/database
           kubectl delete -f k8s/fpm
           kubectl delete -f k8s/webserver
-          kubectl delete -f k8s/queue-workers
-          kubectl delete -f k8s/cronjob
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve -input=false
