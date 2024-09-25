@@ -62,7 +62,10 @@ jobs:
       - name: Criar ou Atualizar Secrets no Kubernetes
         run: |
           kubectl create secret generic secret-common \
-            --from-literal=TESTE=${{ env.MY_AWS_SECRET_TESTE }} \
+            --from-literal=DB_HOST=${{ env.MY_AWS_SECRET_DB_HOST }} \
+            --from-literal=DB_USERNAME=${{ env.MY_AWS_SECRET_DB_USERNAME }} \
+            --from-literal=DB_PASSWORD=${{ env.MY_AWS_SECRET_DB_PASSWORD }} \
+            --from-literal=DB_DATABASE=${{ env.MY_AWS_SECRET_DB_DATABASE }} \
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy k8s
