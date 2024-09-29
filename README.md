@@ -62,6 +62,20 @@ Política IAM (JSON)
 			"Effect": "Allow",
 			"Action": "s3:*",
 			"Resource": "arn:aws:s3:::*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"kms:*"
+			],
+			"Resource": "*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"logs:*"
+			],
+			"Resource": "arn:aws:logs:*:*:*"
 		}
 	]
 }
