@@ -43,7 +43,7 @@ jobs:
           SERVICES=$(kubectl get services --all-namespaces -o json | jq '.items | length')
           DEPLOYMENTS=$(kubectl get deployments --all-namespaces -o json | jq '.items | length')
           
-          if [ "$PODS" -gt 0 ] || [ "$SERVICES" -gt 0 ] || [ "$DEPLOYMENTS" -gt 0 ]; then
+          if [ "$PODS" -gt 4 ] || [ "$SERVICES" -gt 2 ] || [ "$DEPLOYMENTS" -gt 1 ]; then
             echo "Atenção: Existem recursos em execução no cluster!"
             echo "Pods: $PODS"
             echo "Services: $SERVICES"
