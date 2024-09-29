@@ -41,23 +41,17 @@ Política IAM (JSON)
 	"Statement": [
 		{
 			"Effect": "Allow",
-			"Action": [
-				"*"
-			],
+			"Action": "ec2:*",
 			"Resource": "*"
 		},
 		{
 			"Effect": "Allow",
-			"Action": [
-				"*"
-			],
+			"Action": "eks:*",
 			"Resource": "*"
 		},
 		{
 			"Effect": "Allow",
-			"Action": [
-				"*"
-			],
+			"Action": "iam:*",
 			"Resource": [
 				"arn:aws:iam::*:role/eks-*",
 				"arn:aws:iam::*:role/*-eks-node-group-*",
@@ -66,17 +60,8 @@ Política IAM (JSON)
 		},
 		{
 			"Effect": "Allow",
-			"Action": [
-				"*"
-			],
+			"Action": "s3:*",
 			"Resource": "arn:aws:s3:::*"
-		},
-		{
-			"Effect": "Allow",
-			"Action": [
-				"*"
-			],
-			"Resource": "arn:aws:logs:*:*:log-group:/aws/eks/*"
 		}
 	]
 }
@@ -111,7 +96,7 @@ Esse workflow é acionado automaticamente sempre que uma pull request é aberta 
 - **Formatar e Validar Configurações**: Formata e valida os arquivos Terraform.
 - **Gerar Plano de Execução**: Executa `terraform plan` para exibir o plano de mudanças sem aplicar nada.
 
-### 2. **Terraform Apply and Store Output**
+### 2. **Terraform Apply**
 
 Este workflow é acionado em qualquer push na branch `main` e executa as seguintes etapas:
 
