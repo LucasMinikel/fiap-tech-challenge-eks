@@ -55,6 +55,7 @@ Política IAM (JSON)
                 "iam:CreateRole",
                 "iam:AttachRolePolicy",
                 "iam:PutRolePolicy",
+                "iam:GetRolePolicy",
                 "iam:CreatePolicy",
                 "iam:CreateOpenIDConnectProvider",
                 "iam:GetRole",
