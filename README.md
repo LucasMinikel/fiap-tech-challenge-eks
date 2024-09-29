@@ -1,76 +1,117 @@
-# Tech Challenge EKS
+# FIAP Tech Challenge EKS - Automação com Terraform
 
-Este projeto implementa uma infraestrutura EKS (Elastic Kubernetes Service) na AWS usando Terraform.
+Este repositório tem como objetivo automatizar a infraestrutura do desafio de integração com o AWS EKS usando Terraform, juntamente com uma CI/CD pipeline via GitHub Actions.
 
-## Requisitos
+## Passo a Passo para Utilização do Repositório
 
-Para executar este projeto localmente, você precisa ter:
+### 1. Fazer um Fork
+Primeiro, faça um fork deste repositório para sua conta do GitHub.
 
-1. Terraform instalado
-2. AWS CLI instalado
-3. AWS CLI configurado com suas credenciais
+### 2. Criar um Bucket S3 para o State do Terraform
 
-## Configuração do AWS CLI
+O Terraform utiliza um backend para armazenar o estado da infraestrutura. No AWS, o estado pode ser armazenado em um bucket S3. Para criar o bucket, execute o comando apropriado.
 
-Antes de começar, certifique-se de que o AWS CLI está configurado corretamente:
+> **Importante:** O nome do bucket deve ser único globalmente na AWS. Substitua `<nome-do-bucket-unique>` por um nome exclusivo.
 
-## Executando o Terraform
+```bash
+aws s3api create-bucket --bucket <nome-do-bucket-unique> --region sa-east-1 --create-bucket-configuration LocationConstraint=sa-east-1
+```
 
-Siga estes passos para planejar, aplicar e destruir a infraestrutura:
+Depois de criar o bucket, atualize o arquivo `providers.tf` no bloco de configuração do Terraform com o novo nome do bucket.
 
-### Plan
+```hcl
+terraform {
+  backend "s3" {
+    bucket = "<nome-do-bucket-unique>"
+    key    = "terraform/state"
+    region = "sa-east-1"
+  }
+}
+```
 
-1. Navegue até o diretório do projeto
-2. Execute o comando:
-   ```
-   terraform plan
-   ```
-3. Revise o plano de execução
+Isso permitirá que o Terraform use o bucket recém-criado para armazenar o estado da sua infraestrutura. Lembre-se de manter o nome do bucket consistente entre o comando e o arquivo de configuração.
 
-### Apply
+### 3. Criar um Usuário com Permissões no AWS
+Crie um usuário no AWS IAM com as permissões necessárias para a execução do Terraform, utilizando a política abaixo. Lembre-se de gerar uma chave de acesso para este usuário.
 
-1. Para aplicar as mudanças, execute:
-   ```
-   terraform apply
-   ```
-2. Digite 'yes' quando solicitado para confirmar
+Política IAM (JSON)
+```json
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": "ec2:*",
+			"Resource": "*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "eks:*",
+			"Resource": "*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "iam:*",
+			"Resource": [
+				"arn:aws:iam::*:role/eks-*",
+				"arn:aws:iam::*:role/*-eks-node-group-*",
+				"arn:aws:iam::*:role/*-cluster-*"
+			]
+		},
+		{
+			"Effect": "Allow",
+			"Action": "s3:*",
+			"Resource": "arn:aws:s3:::*"
+		}
+	]
+}
+```
 
-### Destroy
+### 4. Cadastrar as Chaves no GitHub
 
-1. Para destruir a infraestrutura, use:
-   ```
-   terraform destroy
-   ```
-2. Confirme digitando 'yes' quando solicitado
+Para que o Terraform e os workflows do GitHub Actions funcionem corretamente, será necessário cadastrar as credenciais da AWS no repositório do GitHub. Siga os passos abaixo:
 
-## Configuração das Credenciais da AWS
+1. No repositório GitHub, acesse **Settings** > **Secrets and variables** > **Actions** > **New repository secret**.
+2. Adicione as seguintes chaves e valores:
 
-Para que o Terraform possa interagir com a AWS, é necessário configurar as seguintes variáveis de ambiente com suas credenciais da AWS:
+- `AWS_ACCESS_KEY_ID`: Sua chave de acesso (Access Key ID) da AWS.
+- `AWS_SECRET_ACCESS_KEY`: Sua chave secreta (Secret Access Key) da AWS.
 
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `AWS_DEFAULT_REGION`
+Essas chaves serão utilizadas para autenticar o Terraform no AWS durante os workflows.
 
-Você pode configurar essas variáveis no seu ambiente local ou no seu pipeline de CI/CD.
+---
 
-## Criação de um Bucket S3 para o Estado do Terraform
+## GitHub Actions
 
-O estado do Terraform será armazenado em um bucket S3. Para criar este bucket, execute o seguinte comando:
+Este repositório contém três workflows principais para automatizar a criação e destruição de infraestrutura usando Terraform, além de validar mudanças via pull requests.
 
-aws s3api create-bucket --bucket minikel-eks-tfstate --region sa-east-1 --create-bucket-configuration LocationConstraint=sa-east-1
+### 1. **Terraform Plan (Pull Request)**
 
-## Comandos Executados no GitHub Actions
+Esse workflow é acionado automaticamente sempre que uma pull request é aberta ou modificada na branch `main`. Ele segue as mesmas etapas de inicialização e validação dos outros workflows, mas ao invés de aplicar as mudanças, ele:
 
-O pipeline de CI/CD no GitHub Actions executa os seguintes comandos:
+- **Checkout do repositório**: Clona o repositório.
+- **Configuração da AWS CLI**: Autentica a AWS CLI.
+- **Setup Terraform**: Configura o ambiente com a versão especificada do Terraform.
+- **Inicializar Terraform**: Executa `terraform init`.
+- **Formatar e Validar Configurações**: Formata e valida os arquivos Terraform.
+- **Gerar Plano de Execução**: Executa `terraform plan` para exibir o plano de mudanças sem aplicar nada.
 
-1. **`terraform init`**: Inicializa o Terraform e configura o backend para armazenar o estado no bucket S3.
-2. **`terraform plan`**: Gera um plano de execução mostrando as mudanças que serão aplicadas na infraestrutura.
-3. **`terraform apply`**: Aplica as mudanças na infraestrutura conforme o plano gerado.
+### 2. **Terraform Apply**
 
-Esses comandos são executados nas seguintes etapas do GitHub Actions:
+Este workflow é acionado em qualquer push na branch `main` e executa as seguintes etapas:
 
-- **`terraform init`**: Executado na etapa de inicialização do pipeline.
-- **`terraform plan`**: Executado após a inicialização para verificar as mudanças.
-- **`terraform apply`**: Executado após a aprovação do plano para aplicar as mudanças.
+- **Checkout do repositório**: Clona o repositório para a execução do pipeline.
+- **Configuração da AWS CLI**: Autentica a AWS CLI usando as credenciais fornecidas nos secrets.
+- **Setup Terraform**: Configura o ambiente com a versão especificada do Terraform.
+- **Inicializar Terraform**: Executa `terraform init` para inicializar o backend de estado.
+- **Planejar e Aplicar Infraestrutura**: Gera um plano de execução (`terraform plan`) e aplica automaticamente as mudanças (`terraform apply`).
 
-Certifique-se de que as credenciais da AWS estejam configuradas corretamente no GitHub Actions para que esses comandos possam ser executados com sucesso.
+### 3. **Terraform Destroy**
+
+Este workflow é acionado manualmente (via `workflow_dispatch`) e é responsável por destruir a infraestrutura provisionada. Os passos são:
+
+- **Checkout do repositório**: Clona o repositório.
+- **Configuração da AWS CLI**: Autentica a AWS CLI.
+- **Inicializar Terraform**: Inicializa o backend para preparar a destruição dos recursos.
+- **Verificar Recursos em execução no cluster**: Bloqueia destruição se houver pods em execução no cluster.
+- **Destruir Infraestrutura**: Executa `terraform destroy` para remover os recursos provisionados.
