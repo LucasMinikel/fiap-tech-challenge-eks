@@ -76,7 +76,8 @@ Política IAM (JSON)
 				"iam:TagPolicy",
 				"iam:UntagOpenIDConnectProvider",
 				"iam:UntagPolicy",
-				"iam:CreateServiceLinkedRole"
+				"iam:CreateServiceLinkedRole",
+				"iam:TagRole"
 			],
 			"Resource": "*"
 		},
