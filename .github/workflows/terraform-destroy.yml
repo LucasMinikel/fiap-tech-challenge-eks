@@ -27,6 +27,12 @@ jobs:
         with:
           terraform_version: 1.7.0
 
+      - name: Inicializar Terraform
+        run: terraform init -upgrade
+   
+      - name: Inicializar Plano
+        run: terraform plan
+  
       - name: Atualizar configuração do Kube
         run: aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
 
