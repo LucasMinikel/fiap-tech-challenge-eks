@@ -37,47 +37,64 @@ Crie um usuário no AWS IAM com as permissões necessárias para a execução do
 Política IAM (JSON)
 ```json
 {
-	"Version": "2012-10-17",
-	"Statement": [
-		{
-			"Effect": "Allow",
-			"Action": "ec2:*",
-			"Resource": "*"
-		},
-		{
-			"Effect": "Allow",
-			"Action": "eks:*",
-			"Resource": "*"
-		},
-		{
-			"Effect": "Allow",
-			"Action": "iam:*",
-			"Resource": [
-				"arn:aws:iam::*:role/eks-*",
-				"arn:aws:iam::*:role/*-eks-node-group-*",
-				"arn:aws:iam::*:role/*-cluster-*"
-			]
-		},
-		{
-			"Effect": "Allow",
-			"Action": "s3:*",
-			"Resource": "arn:aws:s3:::*"
-		},
-		{
-			"Effect": "Allow",
-			"Action": [
-				"kms:*"
-			],
-			"Resource": "*"
-		},
-		{
-			"Effect": "Allow",
-			"Action": [
-				"logs:*"
-			],
-			"Resource": "arn:aws:logs:*:*:*"
-		}
-	]
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "ec2:*",
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "eks:*",
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateRole",
+                "iam:AttachRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:GetRolePolicy",
+                "iam:CreatePolicy",
+                "iam:CreateOpenIDConnectProvider",
+                "iam:GetRole",
+                "iam:ListAttachedRolePolicies",
+                "iam:ListRolePolicies",
+                "iam:ListInstanceProfilesForRole",
+                "iam:PassRole",
+                "iam:DetachRolePolicy",
+                "iam:DeleteRolePolicy",
+                "iam:DeleteRole"
+            ],
+            "Resource": [
+                "arn:aws:iam::*:role/eks-*",
+                "arn:aws:iam::*:role/*-eks-node-group-*",
+                "arn:aws:iam::*:role/*-cluster-*",
+                "arn:aws:iam::*:oidc-provider/*",
+                "arn:aws:iam::*:policy/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": "s3:*",
+            "Resource": "arn:aws:s3:::*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "kms:*"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:*"
+            ],
+            "Resource": "arn:aws:logs:*:*:*"
+        }
+    ]
 }
 ```
 
