@@ -23,52 +23,11 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-          
-      - name: Secrets Manager
-        id: secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: |
-            MY_AWS_SECRET
-          parse-json-secrets: true    
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.7.0
 
-      - name: Inicializar Terraform
-        run: terraform init -upgrade
-
-      - name: Formatar arquivos de configuração
-        run: terraform fmt -check
-
-      - name: Validar arquivos de configuração
-        run: terraform validate
-
-      - name: Planejar infraestrutura
-        run: terraform plan
-
       - name: Aplicar infraestrutura
         run: terraform apply -auto-approve -input=false
-
-      - name: Atualizar configuração do Kube
-        run: aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
-
-      - name: Deploy common
-        run: |
-          kubectl apply -f k8s/common
-
-      - name: Criar ou Atualizar Secrets no Kubernetes
-        run: |
-          kubectl create secret generic secret-common \
-            --from-literal=DB_HOST=${{ env.MY_AWS_SECRET_DB_HOST }} \
-            --from-literal=DB_USERNAME=${{ env.MY_AWS_SECRET_DB_USERNAME }} \
-            --from-literal=DB_PASSWORD=${{ env.MY_AWS_SECRET_DB_PASSWORD }} \
-            --from-literal=DB_DATABASE=${{ env.MY_AWS_SECRET_DB_DATABASE }} \
-            --dry-run=client -o yaml | kubectl apply -f -
-
-      - name: Deploy k8s
-        run: |
-          kubectl apply -f k8s/fpm
-          kubectl apply -f k8s/webserver

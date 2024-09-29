@@ -27,23 +27,26 @@ jobs:
         with:
           terraform_version: 1.7.0
 
-      - name: Inicializar Terraform
-        run: terraform init -upgrade
-
-      - name: Formatar arquivos de configuração
-        run: terraform fmt -check
-
-      - name: Validar arquivos de configuração
-        run: terraform validate
-
       - name: Atualizar configuração do Kube
         run: aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
 
-      - name: Delete k8s
+      - name: Verificar recursos em execução no cluster
         run: |
-          kubectl delete -f k8s/common
-          kubectl delete -f k8s/fpm
-          kubectl delete -f k8s/webserver
-
+          echo "Verificando recursos em execução no cluster..."
+          PODS=$(kubectl get pods --all-namespaces -o json | jq '.items | length')
+          SERVICES=$(kubectl get services --all-namespaces -o json | jq '.items | length')
+          DEPLOYMENTS=$(kubectl get deployments --all-namespaces -o json | jq '.items | length')
+          
+          if [ "$PODS" -gt 0 ] || [ "$SERVICES" -gt 0 ] || [ "$DEPLOYMENTS" -gt 0 ]; then
+            echo "Atenção: Existem recursos em execução no cluster!"
+            echo "Pods: $PODS"
+            echo "Services: $SERVICES"
+            echo "Deployments: $DEPLOYMENTS"
+            echo "Por favor, revise e remova manualmente estes recursos antes de prosseguir com a destruição da infraestrutura."
+            exit 1
+          else
+            echo "Nenhum recurso em execução encontrado. Prosseguindo com a destruição da infraestrutura."
+          fi
+          
       - name: Terraform Destroy
         run: terraform destroy -auto-approve -input=false
